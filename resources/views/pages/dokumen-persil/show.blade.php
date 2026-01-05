@@ -8,11 +8,8 @@
                 <div class="card-header">
                     <h4 class="card-title">Detail Dokumen Persil</h4>
                     <div class="card-tools">
-                        <a href="{{ route('dokumen-persil.edit', $dokumen->dokumen_id) }}" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i> Edit
-                        </a>
-                        <a href="{{ route('persil.show', $dokumen->persil_id) }}" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali ke Persil
+                        <a href="{{ route('dokumen-persil.index') }}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Kembali ke Daftar
                         </a>
                     </div>
                 </div>
@@ -38,7 +35,7 @@
                                             {{ $dokumen->persil->kode_persil }}
                                         </a>
                                         <br>
-                                        <small class="text-muted">{{ $dokumen->persil->penilik->nama }}</small>
+                                        <small class="text-muted">Pemilik: {{ $dokumen->persil->pemilik->nama ?? '-' }}</small>
                                     </td>
                                 </tr>
                                 <tr>
@@ -59,50 +56,62 @@
                         </div>
                     </div>
 
-                    <!-- ===== FILE DOKUMEN SECTION ===== -->
                     @if ($mediaFiles->count() > 0)
                         <div class="row mt-4">
                             <div class="col-12">
                                 <h5>File Dokumen ({{ $mediaFiles->count() }})</h5>
                                 <div class="row">
                                     @foreach ($mediaFiles as $media)
-                                        <div class="col-md-3 mb-3">
-                                            <div class="card h-100">
-                                                @if (in_array($media->mime_type, ['image/jpeg', 'image/jpg', 'image/png']))
-                                                    <img src="{{ asset('storage/' . $media->file_url) }}"
-                                                        class="card-img-top" style="height: 150px; object-fit: cover;"
-                                                        alt="{{ $media->caption }}">
-                                                @else
-                                                    <div class="card-body text-center py-4">
-                                                        @if ($media->mime_type == 'application/pdf')
-                                                            <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                                        @elseif(in_array($media->mime_type, [
-                                                                'application/msword',
-                                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                                            ]))
-                                                            <i class="fas fa-file-word fa-3x text-primary"></i>
-                                                        @else
-                                                            <i class="fas fa-file fa-3x text-muted"></i>
-                                                        @endif
+                                        <div class="col-md-3 mb-4">
+                                            <div class="card h-100 shadow-sm">
+                                                {{-- Preview Area --}}
+                                                <div class="card-body p-0 d-flex align-items-center justify-content-center bg-light" style="height: 160px; overflow: hidden;">
+                                                    @if (in_array($media->mime_type, ['image/jpeg', 'image/jpg', 'image/png']))
+                                                        {{-- Jika Gambar, tampilkan thumbnail --}}
+                                                        <a href="{{ route('dokumen-persil.preview', $media->media_id) }}" target="_blank" class="w-100 h-100 d-flex align-items-center justify-content-center">
+                                                            <img src="{{ asset('storage/' . $media->file_url) }}"
+                                                                 class="img-fluid"
+                                                                 style="max-height: 100%; max-width: 100%; object-fit: contain;"
+                                                                 alt="{{ $media->caption }}">
+                                                        </a>
+                                                    @else
+                                                        {{-- Jika Dokumen, tampilkan Icon --}}
+                                                        <div class="text-center">
+                                                            @if ($media->mime_type == 'application/pdf')
+                                                                <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                                            @elseif(in_array($media->mime_type, ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']))
+                                                                <i class="fas fa-file-word fa-4x text-primary"></i>
+                                                            @elseif(in_array($media->mime_type, ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']))
+                                                                <i class="fas fa-file-excel fa-4x text-success"></i>
+                                                            @else
+                                                                <i class="fas fa-file fa-4x text-secondary"></i>
+                                                            @endif
+                                                            <div class="mt-2 small fw-bold text-muted">{{ strtoupper(pathinfo($media->file_url, PATHINFO_EXTENSION)) }}</div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+
+                                                {{-- Footer & Actions --}}
+                                                <div class="card-footer bg-white p-3 border-top">
+                                                    <div class="mb-3">
+                                                        <h6 class="card-title text-truncate mb-0" title="{{ $media->caption }}">
+                                                            {{ $media->caption }}
+                                                        </h6>
+                                                        <small class="text-muted">
+                                                            {{ $media->created_at->format('d M Y') }}
+                                                        </small>
                                                     </div>
-                                                @endif
-                                                <div class="card-body">
-                                                    <h6 class="card-title text-truncate" title="{{ $media->caption }}">
-                                                        {{ $media->caption }}
-                                                    </h6>
-                                                    <p class="card-text small text-muted mb-2">
-                                                        {{ strtoupper(pathinfo($media->file_url, PATHINFO_EXTENSION)) }}
-                                                        <br>
-                                                        {{ $media->created_at->format('d/m/Y H:i') }}
-                                                    </p>
-                                                    <div class="d-flex justify-content-between">
-                                                        <a href="{{ route('dokumen-persil.download', $media->media_id) }}"
-                                                            target="_blank" class="btn btn-sm btn-outline-primary">
-                                                            <i class="fas fa-eye"></i>
+
+                                                    {{-- TOMBOL AKSI YANG DIPERBAIKI --}}
+                                                    <div class="d-flex gap-2">
+                                                        <a href="{{ route('dokumen-persil.preview', $media->media_id) }}"
+                                                           target="_blank"
+                                                           class="btn btn-sm btn-outline-primary flex-fill">
+                                                            <i class="fas fa-eye me-1"></i> Lihat
                                                         </a>
                                                         <a href="{{ route('dokumen-persil.download', $media->media_id) }}"
-                                                            class="btn btn-sm btn-outline-success">
-                                                            <i class="fas fa-download"></i>
+                                                           class="btn btn-sm btn-outline-success flex-fill">
+                                                            <i class="fas fa-download me-1"></i> Unduh
                                                         </a>
                                                     </div>
                                                 </div>
@@ -114,11 +123,10 @@
                         </div>
                     @else
                         <div class="alert alert-info mt-4">
-                            <i class="fas fa-info-circle"></i> Tidak ada file dokumen terupload.
+                            <i class="fas fa-info-circle me-2"></i> Tidak ada file dokumen yang terupload untuk data ini.
                         </div>
                     @endif
-                    <!-- ===== END FILE DOKUMEN SECTION ===== -->
-                </div>
+                    </div>
             </div>
         </div>
     </div>

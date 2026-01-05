@@ -1,140 +1,103 @@
-<!-- NAVBAR FIXED - DROPDOWN BERFUNGSI -->
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom fixed-top">
     <div class="container-fluid">
-        <!-- Sidebar Toggle Button (Mobile) -->
         <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Brand Logo -->
         <a class="navbar-brand d-none d-lg-block" href="{{ route('dashboard') }}">
-            <span class="brand-text fw-bold text-primary">Bina Desa</span>
-            <small class="text-muted">Admin Panel</small>
+            <i class="fas fa-home me-2 text-primary"></i>
+            <span class="brand-text fw-bold text-primary">Persil</span>
+            <small class="text-muted ms-2">Admin Panel</small>
         </a>
 
-        <!-- Mobile Brand -->
         <a class="navbar-brand d-lg-none" href="{{ route('dashboard') }}">
+            <i class="fas fa-home me-2 text-primary"></i>
             <span class="fw-bold text-primary">Bina Desa</span>
         </a>
 
-        <!-- Navbar Content -->
         <div class="collapse navbar-collapse" id="navbarContent">
-            <ul class="navbar-nav ms-auto">
-                <!-- Notifications -->
+            <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item dropdown">
-                    <a class="nav-link position-relative" href="#" role="button" data-bs-toggle="dropdown">
-                        <i class="bi bi-bell"></i>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                            3
-                        </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow">
-                        <li><h6 class="dropdown-header">Notifications</h6></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-person-plus me-2"></i> New user registered</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="bi bi-file-earmark-plus me-2"></i> New persil added</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-center" href="#">View all</a></li>
-                    </ul>
-                </li>
+                    <a class="nav-link dropdown-toggle d-flex align-items-center p-2" href="#"
+                       id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
-                <!-- User Menu -->
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#"
-                       id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <!-- User Avatar -->
-                        <div class="user-avatar me-2">
+                        <div class="me-2">
                             @if(Auth::user()->avatar)
-                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                     class="rounded-circle" width="32" height="32" alt="User Avatar">
+                                {{-- PERBAIKAN DI SINI: Tambahkan ->file_url --}}
+                                <img src="{{ asset('storage/' . Auth::user()->avatar->file_url) }}"
+                                     class="rounded-circle" width="36" height="36"
+                                     style="object-fit: cover;" alt="User Avatar">
                             @else
                                 <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                     style="width: 32px; height: 32px;">
+                                     style="width: 36px; height: 36px; font-size: 16px;">
                                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                                 </div>
                             @endif
                         </div>
 
-                        <!-- User Info -->
-                        <div class="user-info d-none d-lg-block">
-                            <div class="user-name">{{ Auth::user()->name }}</div>
-                            <div class="user-role text-muted small">
-                                {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
+                        <div class="user-info d-none d-lg-block me-1">
+                            <div class="user-name fw-bold">{{ Auth::user()->name }}</div>
+                            <div class="user-role small text-muted">
+                                @php
+                                    $roleLabels = [
+                                        'super_admin' => 'Super Admin',
+                                        'admin' => 'Administrator',
+                                        'user' => 'User'
+                                    ];
+                                @endphp
+                                {{ $roleLabels[Auth::user()->role] ?? Auth::user()->role }}
                             </div>
                         </div>
 
-                        <i class="bi bi-chevron-down ms-1"></i>
+                        <i class="fas fa-chevron-down ms-1"></i>
                     </a>
 
-                    <!-- Dropdown Menu -->
-                    <ul class="dropdown-menu dropdown-menu-end shadow-lg" style="min-width: 280px;">
-                        <!-- User Header -->
-                        <li class="dropdown-header bg-primary text-white p-3">
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" style="min-width: 280px;">
+                        <li class="dropdown-header bg-light py-3">
                             <div class="d-flex align-items-center">
-                                @if(Auth::user()->avatar)
-                                    <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                         class="rounded-circle me-3" width="60" height="60" alt="User Avatar">
-                                @else
-                                    <div class="avatar-placeholder rounded-circle bg-white text-primary d-flex align-items-center justify-content-center me-3"
-                                         style="width: 60px; height: 60px; font-size: 1.5rem;">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                    </div>
-                                @endif
+
+                                <div class="me-3">
+                                    @if(Auth::user()->avatar)
+                                        {{-- PERBAIKAN DI SINI: Tambahkan ->file_url --}}
+                                        <img src="{{ asset('storage/' . Auth::user()->avatar->file_url) }}"
+                                             class="rounded-circle" width="60" height="60"
+                                             style="object-fit: cover;" alt="User Avatar">
+                                    @else
+                                        <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                             style="width: 60px; height: 60px; font-size: 24px;">
+                                            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                                        </div>
+                                    @endif
+                                </div>
 
                                 <div>
-                                    <h6 class="mb-0 text-white">{{ Auth::user()->name }}</h6>
-                                    <p class="small mb-0 text-white-50">{{ Auth::user()->email }}</p>
-                                    <p class="small mb-0 text-white-50">
-                                        <i class="bi bi-person-badge me-1"></i>
-                                        {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
-                                    </p>
+                                    <h6 class="mb-1">{{ Auth::user()->name }}</h6>
+                                    <p class="small text-muted mb-1">{{ Auth::user()->email }}</p>
+                                    <span class="badge bg-primary">
+                                        {{ $roleLabels[Auth::user()->role] ?? Auth::user()->role }}
+                                    </span>
                                 </div>
                             </div>
                         </li>
 
-                        <li><hr class="dropdown-divider"></li>
+                        <li><hr class="dropdown-divider my-2"></li>
 
-                        <!-- Menu Items -->
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-person me-2"></i>
-                                Profile
-                            </a>
-                        </li>
-
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-gear me-2"></i>
-                                Settings
-                            </a>
-                        </li>
-
-                        <!-- User Management Link (for Admin/Super Admin) -->
                         @if(Auth::check() && in_array(Auth::user()->role, ['admin', 'super_admin']))
                         <li>
-                            <a class="dropdown-item" href="{{ route('users.index') }}">
-                                <i class="bi bi-people-fill me-2"></i>
+                            <a class="dropdown-item py-2" href="{{ route('users.index') }}">
+                                <i class="fas fa-users-cog me-2 text-primary"></i>
                                 User Management
                             </a>
                         </li>
+                        <li><hr class="dropdown-divider my-2"></li>
                         @endif
 
-                        <!-- Last Login -->
                         <li>
-                            <div class="dropdown-item text-muted small">
-                                <i class="bi bi-clock-history me-2"></i>
-                                Last login: {{ session('last_login') ? \Carbon\Carbon::parse(session('last_login'))->format('d/m/Y H:i') : 'N/A' }}
-                            </div>
-                        </li>
-
-                        <li><hr class="dropdown-divider"></li>
-
-                        <!-- Logout -->
-                        <li>
-                            <form action="{{ route('auth.logout') }}" method="POST" class="dropdown-item p-0">
+                            <form action="{{ route('auth.logout') }}" method="POST" class="mb-0">
                                 @csrf
-                                <button type="submit" class="btn btn-link text-decoration-none w-100 text-start p-2">
-                                    <i class="bi bi-box-arrow-right me-2"></i>
-                                    Sign out
+                                <button type="submit" class="dropdown-item py-2 border-0 bg-transparent w-100 text-start">
+                                    <i class="fas fa-sign-out-alt me-2 text-danger"></i>
+                                    <span class="text-danger">Logout</span>
                                 </button>
                             </form>
                         </li>
@@ -145,46 +108,30 @@
     </div>
 </nav>
 
-<!-- CSS FIX untuk dropdown positioning -->
 <style>
-/* ====================
-   FIX DROPDOWN POSITIONING
-==================== */
-/* Pastikan navbar fixed */
 .navbar.fixed-top {
     position: fixed;
     top: 0;
     right: 0;
     left: 0;
     z-index: 1030;
-    height: 60px;
+    height: 64px;
+    padding-top: 8px;
+    padding-bottom: 8px;
 }
 
-/* Dropdown menu positioning */
-.dropdown-menu {
-    position: absolute !important;
-    top: 100% !important;
-    left: auto !important;
-    right: 0 !important;
-    z-index: 1000 !important;
-    margin-top: 0.125rem !important;
+body {
+    padding-top: 64px;
 }
 
-/* User menu styling */
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.user-info .user-name {
+    font-size: 0.95rem;
+    line-height: 1.2;
 }
 
-.user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.user-info .user-role {
+    font-size: 0.8rem;
+    opacity: 0.8;
 }
 
 .avatar-placeholder {
@@ -194,71 +141,45 @@
     justify-content: center;
 }
 
-.user-info .user-name {
-    font-weight: 600;
-    font-size: 0.9rem;
-    line-height: 1.2;
+.dropdown-menu {
+    margin-top: 8px !important;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.user-info .user-role {
-    font-size: 0.75rem;
-    opacity: 0.7;
+.dropdown-item:hover {
+    background-color: #f8f9fa;
 }
 
-/* Dropdown header styling */
-.dropdown-header.bg-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-}
-
-/* Adjust content untuk fixed navbar */
-body {
-    padding-top: 60px;
-}
-
-/* ====================
-   RESPONSIVE FIXES
-==================== */
+/* Responsive fixes */
 @media (max-width: 991.98px) {
-    /* Mobile adjustments */
     .navbar-brand.d-lg-none {
-        display: block !important;
+        display: flex !important;
+        align-items: center;
     }
 
     .navbar-brand.d-none.d-lg-block {
         display: none !important;
     }
-
-    .navbar-toggler.d-lg-none {
-        display: block !important;
-    }
-
-    /* Dropdown positioning di mobile */
-    .dropdown-menu {
-        position: fixed !important;
-        top: 60px !important;
-        left: 50% !important;
-        right: auto !important;
-        transform: translateX(-50%) !important;
-        width: 90% !important;
-        max-width: 300px !important;
-    }
 }
 </style>
 
-<!-- JavaScript untuk handle dropdown -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap 5 dropdowns
-    var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'))
+    // Initialize Bootstrap dropdowns
+    var dropdownElementList = [].slice.call(document.querySelectorAll('[data-bs-toggle="dropdown"]'));
     var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
-        return new bootstrap.Dropdown(dropdownToggleEl)
+        return new bootstrap.Dropdown(dropdownToggleEl);
     });
 
-    // Prevent dropdown close when clicking inside
-    document.querySelectorAll('.dropdown-menu').forEach(function(element) {
-        element.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
+    // Fix dropdown closing issue
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown')) {
+            var openDropdowns = document.querySelectorAll('.dropdown.show');
+            openDropdowns.forEach(function(dropdown) {
+                bootstrap.Dropdown.getInstance(dropdown.querySelector('.dropdown-toggle')).hide();
+            });
+        }
     });
 });
 </script>

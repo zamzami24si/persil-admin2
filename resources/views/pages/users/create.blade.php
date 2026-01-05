@@ -67,7 +67,7 @@
                                                 Upload Foto Profil
                                             </label>
                                             <input type="file" class="form-control @error('foto_profil') is-invalid @enderror"
-                                                   id="foto_profil" name="foto_profil"
+                                                   id="foto_profil" name="avatar"
                                                    accept=".jpg,.jpeg,.png,.gif"
                                                    onchange="previewImage(this)">
                                             <div class="form-text small">

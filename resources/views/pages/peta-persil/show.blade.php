@@ -1,4 +1,3 @@
-{{-- resources/views/pages/peta-persil/show.blade.php --}}
 @extends('layouts.admin.app')
 
 @section('content')
@@ -17,171 +16,123 @@
                     </div>
                 </div>
                 <div class="card-body">
+
+                    {{-- Alert Messages --}}
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle me-2"></i>{{ session('success') }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+                    @endif
+
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Informasi Peta</h5>
                             <table class="table table-bordered">
-                                <tr>
-                                    <th width="40%">Kode Persil</th>
-                                    <td>{{ $peta->persil->kode_persil }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Penilik</th>
-                                    <td>{{ $peta->persil->penilik->nama }} ({{ $peta->persil->penilik->no_ktp }})</td>
-                                </tr>
-                                <tr>
-                                    <th>Panjang</th>
-                                    <td>
-                                        @if($peta->panjang_m)
-                                            {{ number_format($peta->panjang_m, 2) }} m
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Lebar</th>
-                                    <td>
-                                        @if($peta->lebar_m)
-                                            {{ number_format($peta->lebar_m, 2) }} m
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Luas dari Dimensi</th>
-                                    <td>
-                                        @if($peta->luas_dari_dimensi)
-                                            <strong>{{ number_format($peta->luas_dari_dimensi, 2) }} m²</strong>
-                                        @else
-                                            <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Luas dari Data Persil</th>
-                                    <td>{{ number_format($peta->persil->luas_m2, 2) }} m²</td>
-                                </tr>
-                                <tr>
-                                    <th>Jumlah File</th>
-                                    <td>
-                                        @if($mediaFiles->count() > 0)
-                                            <span class="badge bg-primary">{{ $mediaFiles->count() }} file</span>
-                                        @else
-                                            <span class="badge bg-secondary">Tidak ada file</span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>Data GeoJSON</th>
-                                    <td>
-                                        @if($peta->geojson)
-                                            <span class="badge bg-success">Tersedia</span>
-                                        @else
-                                            <span class="badge bg-secondary">Tidak ada</span>
-                                        @endif
-                                    </td>
-                                </tr>
+                                <tr><th width="40%">Kode Persil</th><td>{{ $peta->persil->kode_persil }}</td></tr>
+                                <tr><th>Pemilik</th><td>{{ $peta->persil->pemilik->nama ?? '-' }}</td></tr>
+                                <tr><th>Panjang</th><td>{{ $peta->panjang_m ? $peta->panjang_m . ' m' : '-' }}</td></tr>
+                                <tr><th>Lebar</th><td>{{ $peta->lebar_m ? $peta->lebar_m . ' m' : '-' }}</td></tr>
+                                <tr><th>Luas (Dimensi)</th><td>{{ $peta->luas_dari_dimensi ? $peta->luas_dari_dimensi . ' m²' : '-' }}</td></tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <h5>Data GeoJSON</h5>
-                            @if($peta->geojson)
-                                <div class="card">
-                                    <div class="card-body">
-                                        <pre class="mb-0" style="max-height: 300px; overflow-y: auto;"><code>{{ json_encode($peta->geojson, JSON_PRETTY_PRINT) }}</code></pre>
-                                    </div>
+                            <div class="card bg-light">
+                                <div class="card-body p-0">
+                                    @if($peta->geojson)
+                                        {{-- Tampilan GeoJSON Rapi --}}
+                                        <pre class="m-0 p-3" style="max-height: 250px; overflow-y: auto; font-size: 0.8rem; background: #2d2d2d; color: #f8f8f2; border-radius: 4px;"><code>{{ json_encode($peta->geojson, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</code></pre>
+                                    @else
+                                        <div class="p-3 text-center text-muted">
+                                            <i class="fas fa-code fa-2x mb-2"></i><br>
+                                            Tidak ada data GeoJSON
+                                        </div>
+                                    @endif
                                 </div>
-                            @else
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i> Tidak ada data GeoJSON untuk peta ini.
-                                </div>
-                            @endif
+                            </div>
                         </div>
                     </div>
 
-                    <!-- ===== FILE MEDIA SECTION ===== -->
-                    @if($mediaFiles->count() > 0)
+                    {{-- File Media --}}
+                  @if($mediaFiles->count() > 0)
                         <div class="row mt-4">
                             <div class="col-12">
-                                <h5>File Peta/Scan ({{ $mediaFiles->count() }})</h5>
-                                <div class="row">
-                                    @foreach($mediaFiles as $media)
-                                        <div class="col-md-3 mb-3">
-                                            <div class="card h-100">
-                                                @if(in_array($media->mime_type, ['image/jpeg', 'image/jpg', 'image/png']))
-                                                    <img src="{{ asset('storage/' . $media->file_url) }}"
-                                                         class="card-img-top"
-                                                         style="height: 150px; object-fit: cover;"
-                                                         alt="{{ $media->caption }}">
-                                                @else
-                                                    <div class="card-body text-center py-4">
-                                                        @if($media->mime_type == 'application/pdf')
-                                                            <i class="fas fa-file-pdf fa-3x text-danger"></i>
-                                                        @elseif($media->mime_type == 'image/svg+xml')
-                                                            <i class="fas fa-file-image fa-3x text-success"></i>
-                                                        @else
-                                                            <i class="fas fa-file fa-3x text-muted"></i>
-                                                        @endif
-                                                    </div>
-                                                @endif
-                                                <div class="card-body">
-                                                    <h6 class="card-title text-truncate" title="{{ $media->caption }}">
-                                                        {{ $media->caption }}
-                                                    </h6>
-                                                    <p class="card-text small text-muted mb-2">
-                                                        {{ strtoupper(pathinfo($media->file_url, PATHINFO_EXTENSION)) }}
-                                                        <br>
-                                                        {{ $media->created_at->format('d/m/Y H:i') }}
-                                                    </p>
-                                                    <div class="d-flex justify-content-between">
-                                                        <a href="{{ route('peta-persil.download', $media->media_id) }}"
-                                                           target="_blank"
-                                                           class="btn btn-sm btn-outline-primary">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <a href="{{ route('peta-persil.download', $media->media_id) }}"
-                                                           class="btn btn-sm btn-outline-success">
-                                                            <i class="fas fa-download"></i>
-                                                        </a>
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h5 class="mb-0">
+                                            <i class="fas fa-file-upload me-2"></i>
+                                            File Peta/Scan ({{ $mediaFiles->count() }})
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            @foreach($mediaFiles as $media)
+                                                <div class="col-md-3 mb-4">
+                                                    <div class="card h-100 border shadow-sm">
+                                                        {{-- LOGIC TAMPILAN GAMBAR --}}
+                                                        <div class="card-body p-0 d-flex align-items-center justify-content-center bg-light" style="height: 200px; overflow: hidden;">
+                                                            @if(in_array($media->mime_type, ['image/jpeg', 'image/jpg', 'image/png']))
+                                                                {{-- Gunakan route preview agar gambar PASTI muncul --}}
+                                                                <img src="{{ route('peta-persil.preview', $media->media_id) }}"
+                                                                     class="img-fluid"
+                                                                     style="width: 100%; height: 100%; object-fit: cover;"
+                                                                     alt="{{ $media->caption }}">
+                                                            @elseif($media->mime_type == 'image/svg+xml')
+                                                                <img src="{{ route('peta-persil.preview', $media->media_id) }}"
+                                                                     class="img-fluid p-3"
+                                                                     style="max-height: 100%;"
+                                                                     alt="SVG Peta">
+                                                            @elseif($media->mime_type == 'application/pdf')
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-file-pdf fa-4x text-danger mb-2"></i>
+                                                                    <p class="mb-0 fw-bold small text-muted">File PDF</p>
+                                                                </div>
+                                                            @else
+                                                                <div class="text-center">
+                                                                    <i class="fas fa-file fa-4x text-muted mb-2"></i>
+                                                                    <p class="mb-0 fw-bold small text-muted">Dokumen</p>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        {{-- FOOTER KARTU --}}
+                                                        <div class="card-footer bg-white p-3">
+                                                            <h6 class="card-title text-truncate mb-1" title="{{ $media->caption }}">
+                                                                {{ $media->caption }}
+                                                            </h6>
+                                                            <p class="card-text small text-muted mb-3">
+                                                                {{ strtoupper(pathinfo($media->file_url, PATHINFO_EXTENSION)) }} •
+                                                                {{ $media->created_at->format('d/m/Y') }}
+                                                            </p>
+
+                                                            {{-- Tombol Aksi --}}
+                                                            <div class="d-flex gap-2">
+                                                                <a href="{{ route('peta-persil.preview', $media->media_id) }}"
+                                                                   target="_blank"
+                                                                   class="btn btn-sm btn-outline-primary flex-fill">
+                                                                    <i class="fas fa-eye me-1"></i> Lihat
+                                                                </a>
+                                                                <a href="{{ route('peta-persil.download', $media->media_id) }}"
+                                                                   class="btn btn-sm btn-outline-success flex-fill">
+                                                                    <i class="fas fa-download me-1"></i> Unduh
+                                                                </a>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            @endforeach
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     @else
-                        <div class="alert alert-info mt-4">
-                            <i class="fas fa-info-circle"></i> Tidak ada file peta/scan terupload.
+                        <div class="alert alert-warning mt-4">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Tidak ada file peta/scan terupload untuk persil ini.
+                            <a href="{{ route('peta-persil.edit', $peta->peta_id) }}" class="alert-link">
+                                Klik di sini untuk menambahkan file
+                            </a>
                         </div>
                     @endif
-                    <!-- ===== END FILE MEDIA SECTION ===== -->
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-between">
-                                <a href="{{ route('persil.show', $peta->persil_id) }}" class="btn btn-info">
-                                    <i class="fas fa-map"></i> Lihat Detail Persil
-                                </a>
-                                <div>
-                                    <a href="{{ route('peta-persil.edit', $peta->peta_id) }}" class="btn btn-warning">
-                                        <i class="fas fa-edit"></i> Edit Peta
-                                    </a>
-                                    <form action="{{ route('peta-persil.destroy', $peta->peta_id) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger"
-                                            onclick="return confirm('Yakin ingin menghapus data peta ini?')">
-                                            <i class="fas fa-trash"></i> Hapus Peta
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

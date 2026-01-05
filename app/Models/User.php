@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage; // Pastikan import ini ada
 
 class User extends Authenticatable
 {
@@ -32,6 +33,8 @@ class User extends Authenticatable
     }
 
     // ===== RELATIONSHIPS =====
+
+    // Relasi untuk semua media user
     public function media()
     {
         return $this->hasMany(Media::class, 'ref_id', 'id')
@@ -39,45 +42,55 @@ class User extends Authenticatable
                     ->orderBy('sort_order');
     }
 
+    // Relasi spesifik untuk Avatar (Foto Profil)
     public function avatar()
     {
+        // Kita ambil 1 data media terakhir milik user ini.
+        // Dihapus filter 'caption' agar lebih fleksibel (apapun yg diupload terakhir jadi avatar)
         return $this->hasOne(Media::class, 'ref_id', 'id')
                     ->where('ref_table', 'users')
-                    ->where('caption', 'like', '%avatar%')
-                    ->latest();
+                    ->orderBy('media_id', 'desc'); // Pastikan ambil yang ID-nya paling besar (terbaru)
     }
 
     // ===== ACCESSORS =====
+
+    // Cara panggil di blade: {{ $user->avatar_url }}
+    // Tidak perlu panggil function, cukup propertinya
     public function getAvatarUrlAttribute()
     {
-        if ($this->avatar) {
+        // Cek apakah relasi avatar ada datanya dan file fisiknya ada
+        if ($this->avatar && $this->avatar->file_url) {
             return asset('storage/' . $this->avatar->file_url);
         }
 
+        // Generate avatar default dari inisial nama jika tidak ada foto
         return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&color=7F9CF5&background=EBF4FF';
     }
 
     // ===== MEDIA METHODS =====
+
     public function uploadAvatar($file)
     {
-        // Hapus avatar lama jika ada
+        // 1. Hapus avatar lama jika ada (Fisik & Database)
         if ($this->avatar) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($this->avatar->file_url);
+            // Hapus file fisik dari storage
+            Storage::disk('public')->delete($this->avatar->file_url);
+            // Hapus record dari database
             $this->avatar->delete();
         }
 
-        $fileName = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = 'uploads/users/' . $this->id . '/' . $fileName;
+        // 2. Simpan file baru
+        // store() otomatis membuat nama unik (hash) agar tidak bentrok dan menghindari cache browser
+        $path = $file->store('uploads/users', 'public');
 
-        $file->storeAs('public/uploads/users/' . $this->id, $fileName);
-
+        // 3. Simpan info ke database Media
         return Media::create([
             'ref_table' => 'users',
-            'ref_id' => $this->id,
-            'file_url' => $path,
-            'caption' => 'Avatar',
-            'mime_type' => $file->getMimeType(),
-            'sort_order' => 0
+            'ref_id'    => $this->id,
+            'file_url'  => $path,
+            'caption'   => 'Avatar', // Label statis
+            'mime_type' => $file->getClientMimeType(), // Simpan tipe file (jpg/png)
+            'sort_order'=> 0
         ]);
     }
 
@@ -89,6 +102,6 @@ class User extends Authenticatable
 
     public function isAdmin()
     {
-        return $this->role === 'admin' || $this->role === 'super_admin';
+        return in_array($this->role, ['admin', 'super_admin']);
     }
 }

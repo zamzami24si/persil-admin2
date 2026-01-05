@@ -12,11 +12,25 @@ use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('avatar')
-            ->orderBy('name')
-            ->paginate(10);
+        $query = User::query()->with('avatar');
+
+        // Filter berdasarkan role
+        if ($request->filled('role')) {
+            $query->where('role', $request->role);
+        }
+
+        // Filter berdasarkan pencarian
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $users = $query->orderBy('name')->paginate(10);
 
         return view('pages.users.index', compact('users'));
     }
@@ -59,9 +73,32 @@ class UserController extends Controller
             ->with('success', 'User berhasil ditambahkan');
     }
 
+    // ===== METHOD SHOW YANG HILANG =====
+    public function show($id)
+    {
+        $user = User::with('avatar')->findOrFail($id);
+
+        // Tambahkan data tambahan untuk view
+        $user->avatar_url = $user->avatar_url ?? asset('assets/img/default-avatar.png');
+        $user->role_badge_class = match($user->role) {
+            'super_admin' => 'bg-danger',
+            'admin' => 'bg-warning text-dark',
+            'user' => 'bg-info',
+            default => 'bg-secondary'
+        };
+        $user->status_badge_class = $user->email_verified_at ? 'bg-success' : 'bg-warning text-dark';
+        $user->status_label = $user->email_verified_at ? 'Terverifikasi' : 'Belum Verifikasi';
+
+        return view('pages.users.show', compact('user'));
+    }
+
     public function edit($id)
     {
         $user = User::with('avatar')->findOrFail($id);
+
+        // Tambahkan data untuk view
+        $user->foto_profil_url = $user->avatar_url ?? asset('assets/img/default-avatar.png');
+
         return view('pages.users.edit', compact('user'));
     }
 
@@ -95,18 +132,18 @@ class UserController extends Controller
             $data['password'] = Hash::make($request->password);
         }
 
-        $user->update($data);
+      $user->update($data);
 
-        // Hapus avatar jika dipilih
-        if ($request->has('delete_avatar') && $user->avatar) {
-            Storage::disk('public')->delete($user->avatar->file_url);
-            $user->avatar->delete();
-        }
+    // Hapus avatar jika checkbox delete dicentang
+    if ($request->has('delete_avatar') && $request->delete_avatar == 1 && $user->avatar) {
+        Storage::disk('public')->delete($user->avatar->file_url);
+        $user->avatar->delete();
+    }
 
-        // Upload avatar baru menggunakan metode dari Model
-        if ($request->hasFile('avatar')) {
-            $user->uploadAvatar($request->file('avatar'));
-        }
+    // Upload avatar baru (Method di Model User otomatis menghapus yang lama jika ada)
+    if ($request->hasFile('avatar')) {
+        $user->uploadAvatar($request->file('avatar'));
+    }
 
         return redirect()->route('users.index')
             ->with('success', 'User berhasil diperbarui');
@@ -136,5 +173,45 @@ class UserController extends Controller
 
         return redirect()->route('users.index')
             ->with('success', 'User berhasil dihapus');
+    }
+
+    // ===== METHOD TAMBAHAN UNTUK ROUTES =====
+
+    /**
+     * Hapus foto profil user
+     */
+    public function deleteFotoProfil($id)
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->avatar) {
+            Storage::disk('public')->delete($user->avatar->file_url);
+            $user->avatar->delete();
+
+            return redirect()->route('users.edit', $id)
+                ->with('success', 'Foto profil berhasil dihapus');
+        }
+
+        return redirect()->route('users.edit', $id)
+            ->with('error', 'Tidak ada foto profil untuk dihapus');
+    }
+
+    /**
+     * Verifikasi email user
+     */
+    public function verify($id)
+    {
+        $user = User::findOrFail($id);
+
+        if (!$user->email_verified_at) {
+            $user->email_verified_at = now();
+            $user->save();
+
+            return redirect()->route('users.show', $id)
+                ->with('success', 'Email user berhasil diverifikasi');
+        }
+
+        return redirect()->route('users.show', $id)
+            ->with('info', 'Email user sudah terverifikasi sebelumnya');
     }
 }

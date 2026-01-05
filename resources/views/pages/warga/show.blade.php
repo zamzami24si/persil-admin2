@@ -1,3 +1,4 @@
+{{-- resources/views/pages/warga/show.blade.php --}}
 @extends('layouts.admin.app')
 
 @section('title', 'Bina Desa | Detail Warga')
@@ -20,17 +21,11 @@
             <div class="row">
                 <div class="col-md-3 text-center mb-4">
                     <div class="mb-3">
-                        @if($warga->foto)
-                            <img src="{{ asset('storage/' . $warga->foto) }}"
-                                 alt="Foto {{ $warga->nama }}"
-                                 class="img-fluid rounded"
-                                 style="max-height: 250px;">
-                        @else
-                            <div class="bg-light rounded d-flex align-items-center justify-content-center"
-                                 style="height: 150px; width: 150px; margin: 0 auto;">
-                                <i class="fas fa-user fa-4x text-muted"></i>
-                            </div>
-                        @endif
+                        {{-- PERUBAHAN: Gunakan Accessor foto_url agar otomatis handle jika kosong --}}
+                        <img src="{{ $warga->foto_url }}"
+                             alt="Foto {{ $warga->nama }}"
+                             class="img-fluid rounded shadow-sm"
+                             style="max-height: 250px; width: 100%; object-fit: cover;">
                     </div>
                     <h4>{{ $warga->nama }}</h4>
                     <p class="text-muted">{{ $warga->no_ktp }}</p>
@@ -85,32 +80,8 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Status Warga</label>
-                                <p>
-                                    @if($warga->status_warga == 'aktif')
-                                        <span class="badge bg-success">Aktif</span>
-                                    @elseif($warga->status_warga == 'pindah')
-                                        <span class="badge bg-warning">Pindah</span>
-                                    @elseif($warga->status_warga == 'meninggal')
-                                        <span class="badge bg-danger">Meninggal</span>
-                                    @else
-                                        <span class="badge bg-secondary">{{ $warga->status_warga ?? 'Aktif' }}</span>
-                                    @endif
-                                </p>
-                            </div>
-
-                            <div class="mb-3">
                                 <label class="form-label fw-bold">Tanggal Daftar</label>
-                                <p>
-                                    {{ $warga->created_at ? \Carbon\Carbon::parse($warga->created_at)->format('d-m-Y H:i') : '-' }}
-                                </p>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Terakhir Diupdate</label>
-                                <p>
-                                    {{ $warga->updated_at ? \Carbon\Carbon::parse($warga->updated_at)->format('d-m-Y H:i') : '-' }}
-                                </p>
+                                <p>{{ $warga->created_at ? \Carbon\Carbon::parse($warga->created_at)->format('d-m-Y H:i') : '-' }}</p>
                             </div>
                         </div>
                     </div>
@@ -129,19 +100,4 @@
             </form>
         </div>
     </div>
-
-    <style>
-        .form-label.fw-bold {
-            color: #495057;
-            margin-bottom: 0.25rem;
-        }
-        .card-header .btn-sm {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-        }
-        .badge {
-            font-size: 0.85em;
-            padding: 0.35em 0.65em;
-        }
-    </style>
 @endsection

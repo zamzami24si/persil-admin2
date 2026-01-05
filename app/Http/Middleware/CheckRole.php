@@ -9,12 +9,19 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $role): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (Auth::check() && Auth::user()->role == $role) {
+        if (!Auth::check()) {
+            return redirect()->route('login')->withErrors('Silahkan login terlebih dahulu!');
+        }
+
+        $user = Auth::user();
+
+        // Cek apakah role user ada dalam daftar roles yang diperbolehkan
+        if (in_array($user->role, $roles)) {
             return $next($request);
         }
 
-        return abort(403, 'Unauthorized action.');
+        abort(403, 'Unauthorized action. Hanya ' . implode(', ', $roles) . ' yang dapat mengakses halaman ini.');
     }
 }

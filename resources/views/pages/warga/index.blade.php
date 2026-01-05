@@ -158,7 +158,7 @@
                                     <a href="{{ route('warga.show', $item->warga_id) }}"
                                        class="btn btn-info btn-xs mb-1"
                                        title="Lihat">
-                                        <i class="fas fa-eye fa-xs"></i> Lihat
+                                        <i class="fas fa-eye fa-xs"></i> Detail
                                     </a>
                                     <a href="{{ route('warga.edit', $item->warga_id) }}"
                                        class="btn btn-warning btn-xs mb-1"

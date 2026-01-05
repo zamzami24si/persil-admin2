@@ -1,11 +1,10 @@
 <?php
-// app/Models/DokumenPersil.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 
 class DokumenPersil extends Model
 {
@@ -21,10 +20,9 @@ class DokumenPersil extends Model
         'keterangan'
     ];
 
-    // ===== RELATIONSHIPS =====
     public function persil()
     {
-        return $this->belongsTo(Persil::class, 'persil_id');
+        return $this->belongsTo(Persil::class, 'persil_id', 'persil_id');
     }
 
     public function media()
@@ -34,45 +32,18 @@ class DokumenPersil extends Model
                     ->orderBy('sort_order');
     }
 
-    // ===== SCOPES =====
-    public function scopeFilter(Builder $query, $request, array $filterableColumns)
+    // Method Penting untuk Upload
+    public function uploadDokumenFile($file, $caption = 'Dokumen')
     {
-        foreach ($filterableColumns as $column) {
-            if ($request->filled($column)) {
-                $query->where($column, $request->$column);
-            }
-        }
-        return $query;
+        $path = $file->store('uploads/dokumen_persil', 'public');
+
+        return Media::create([
+            'ref_table' => 'dokumen_persil',
+            'ref_id'    => $this->dokumen_id,
+            'file_url'  => $path,
+            'caption'   => $caption,
+            'mime_type' => $file->getClientMimeType(),
+            'sort_order'=> 0
+        ]);
     }
-
-    public function scopeSearch(Builder $query, $request, array $searchableColumns)
-    {
-        if ($request->filled('search')) {
-            $searchTerm = $request->search;
-            $query->where(function ($q) use ($searchTerm, $searchableColumns) {
-                foreach ($searchableColumns as $column) {
-                    $q->orWhere($column, 'LIKE', '%' . $searchTerm . '%');
-                }
-            });
-        }
-        return $query;
-    }
-
-// ===== MEDIA METHODS =====
-public function uploadDokumenFile($file, $caption = null)
-{
-    $fileName = 'dokumen_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-    $path = 'uploads/dokumen_persil/' . $this->dokumen_id . '/' . $fileName;
-
-    $file->storeAs('public/uploads/dokumen_persil/' . $this->dokumen_id, $fileName);
-
-    return Media::create([
-        'ref_table' => 'dokumen_persil',
-        'ref_id' => $this->dokumen_id,
-        'file_url' => $path,
-        'caption' => $caption ?? 'Dokumen ' . $this->jenis_dokumen,
-        'mime_type' => $file->getMimeType(),
-        'sort_order' => $this->media()->count()
-    ]);
-}
 }

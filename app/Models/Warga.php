@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Warga extends Model
 {
@@ -22,11 +23,13 @@ class Warga extends Model
     ];
 
     // ===== RELATIONSHIPS =====
+
     public function persil()
     {
         return $this->hasMany(Persil::class, 'pemilik_warga_id');
     }
 
+    // Relasi ke semua media
     public function media()
     {
         return $this->hasMany(Media::class, 'ref_id', 'warga_id')
@@ -34,15 +37,16 @@ class Warga extends Model
                     ->orderBy('sort_order');
     }
 
+    // Relasi khusus Avatar (Foto Profil)
     public function avatar()
     {
         return $this->hasOne(Media::class, 'ref_id', 'warga_id')
                     ->where('ref_table', 'warga')
-                    ->where('caption', 'like', '%avatar%')
-                    ->latest();
+                    ->orderBy('media_id', 'desc'); // Ambil yang paling baru
     }
 
-    // ===== SCOPES =====
+    // ===== SCOPES (PENCARIAN & FILTER) - INI YANG KEMARIN HILANG =====
+
     public function scopeFilter($query, $request, $filterableColumns)
     {
         foreach ($filterableColumns as $column) {
@@ -65,21 +69,40 @@ class Warga extends Model
         return $query;
     }
 
-    // ===== MEDIA METHODS =====
+    // ===== ACCESSOR (Untuk memanggil Foto di View) =====
+
+    // Cara panggil: {{ $warga->foto_url }}
+    public function getFotoUrlAttribute()
+    {
+        if ($this->avatar && $this->avatar->file_url) {
+            return asset('storage/' . $this->avatar->file_url);
+        }
+
+        // Gambar default (inisial nama) jika tidak ada foto
+        return 'https://ui-avatars.com/api/?name=' . urlencode($this->nama) . '&color=7F9CF5&background=EBF4FF';
+    }
+
+    // ===== MEDIA METHODS (UPLOAD) =====
+
     public function uploadAvatar($file)
     {
-        $fileName = 'avatar_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = 'uploads/warga/' . $this->warga_id . '/' . $fileName;
+        // 1. Hapus avatar lama jika ada (Fisik & Database)
+        if ($this->avatar) {
+            Storage::disk('public')->delete($this->avatar->file_url);
+            $this->avatar->delete();
+        }
 
-        $file->storeAs('public/uploads/warga/' . $this->warga_id, $fileName);
+        // 2. Simpan file fisik baru
+        $path = $file->store('uploads/warga', 'public');
 
+        // 3. Simpan record ke database Media
         return Media::create([
             'ref_table' => 'warga',
-            'ref_id' => $this->warga_id,
-            'file_url' => $path,
-            'caption' => 'Avatar',
-            'mime_type' => $file->getMimeType(),
-            'sort_order' => 0
+            'ref_id'    => $this->warga_id,
+            'file_url'  => $path,
+            'caption'   => 'Avatar Warga',
+            'mime_type' => $file->getClientMimeType(),
+            'sort_order'=> 0
         ]);
     }
 }

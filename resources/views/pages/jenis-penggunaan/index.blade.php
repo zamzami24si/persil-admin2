@@ -109,7 +109,7 @@
                                 <small>{{ $item->created_at->format('d/m/Y') }}</small>
                             </td>
                             <td>
-                                <div class="btn-group">
+                                <div class="d-flex justify-content-center gap-1">
                                     <a href="{{ route('jenis-penggunaan.show', $item->jenis_id) }}"
                                         class="btn btn-sm btn-info">
                                         <i class="fas fa-eye"></i> Detail

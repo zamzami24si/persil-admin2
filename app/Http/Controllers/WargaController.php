@@ -1,11 +1,11 @@
 <?php
-// app/Http/Controllers/WargaController.php
 
 namespace App\Http\Controllers;
 
 use App\Models\Warga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage; // Import storage
 
 class WargaController extends Controller
 {
@@ -45,6 +45,7 @@ class WargaController extends Controller
             'pekerjaan' => 'required|max:50',
             'telp' => 'nullable|max:15',
             'email' => 'nullable|email|max:100',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validasi foto
         ]);
 
         if ($validator->fails()) {
@@ -54,7 +55,12 @@ class WargaController extends Controller
                 ->with('error', 'Terjadi kesalahan validasi');
         }
 
-        Warga::create($request->all());
+        $warga = Warga::create($request->except('foto'));
+
+        // Logic Upload Foto
+        if ($request->hasFile('foto')) {
+            $warga->uploadAvatar($request->file('foto'));
+        }
 
         return redirect()->route('warga.index')
             ->with('success', 'Data warga berhasil ditambahkan');
@@ -62,7 +68,7 @@ class WargaController extends Controller
 
     public function edit($id)
     {
-        $warga = Warga::findOrFail($id);
+        $warga = Warga::with('avatar')->findOrFail($id); // Eager load avatar
         return view('pages.warga.edit', compact('warga'));
     }
 
@@ -78,6 +84,7 @@ class WargaController extends Controller
             'pekerjaan' => 'required|max:50',
             'telp' => 'nullable|max:15',
             'email' => 'nullable|email|max:100',
+            'foto' => 'nullable|image|mimes:jpg,jpeg,png|max:2048', // Validasi foto
         ]);
 
         if ($validator->fails()) {
@@ -87,22 +94,33 @@ class WargaController extends Controller
                 ->with('error', 'Terjadi kesalahan validasi');
         }
 
-        $warga->update($request->all());
+        $warga->update($request->except('foto'));
+
+        // Logic Update Foto
+        if ($request->hasFile('foto')) {
+            $warga->uploadAvatar($request->file('foto'));
+        }
 
         return redirect()->route('warga.index')
             ->with('success', 'Data warga berhasil diperbarui');
     }
 
-
-      public function show($id)
+    public function show($id)
     {
-        $warga = Warga::findOrFail($id);
-
+        $warga = Warga::with('avatar')->findOrFail($id);
         return view('pages.warga.show', compact('warga'));
     }
+
     public function destroy($id)
     {
         $warga = Warga::findOrFail($id);
+
+        // Hapus foto dari storage sebelum hapus data warga
+        if ($warga->avatar) {
+            Storage::disk('public')->delete($warga->avatar->file_url);
+            $warga->avatar->delete();
+        }
+
         $warga->delete();
 
         return redirect()->route('warga.index')

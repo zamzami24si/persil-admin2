@@ -42,7 +42,8 @@ Route::middleware(['checkislogin'])->group(function () {
 
     // CRUD Persil - semua user yang login bisa akses
     Route::resource('persil', PersilController::class);
-
+    Route::get('persil/{id}/preview', [PersilController::class, 'previewFile'])->name('persil.preview');
+    Route::get('persil/{id}/download', [PersilController::class, 'downloadFile'])->name('persil.download');
     // ===== PERSIL MEDIA ROUTES =====
   Route::prefix('persil')->group(function () {
     // GANTI NAMA ROUTE DARI 'persil.download' KE 'persil.download-file'
@@ -102,17 +103,17 @@ Route::middleware(['checkislogin'])->group(function () {
     });
 
     // User Management - hanya untuk admin
-    Route::middleware(['checkrole:super_admin'])->prefix('users')->group(function () {
-        Route::get('/', [UserController::class, 'index'])->name('users.index');
-        Route::get('/create', [UserController::class, 'create'])->name('users.create');
-        Route::post('/', [UserController::class, 'store'])->name('users.store');
-        Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
-        Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
-        Route::put('/{id}', [UserController::class, 'update'])->name('users.update');
-        Route::delete('/{id}', [UserController::class, 'destroy'])->name('users.destroy');
+   Route::middleware(['checkislogin', 'checkrole:admin,super_admin'])->prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index'])->name('users.index');
+    Route::get('/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/', [UserController::class, 'store'])->name('users.store');
+    Route::get('/{id}', [UserController::class, 'show'])->name('users.show');
+    Route::get('/{id}/edit', [UserController::class, 'edit'])->name('users.edit');
+    Route::put('/{id}', [UserController::class, 'update'])->name('users.update');
+    Route::delete('/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 
-        // ===== USER MEDIA ROUTES =====
-        Route::delete('/{id}/delete-foto', [UserController::class, 'deleteFotoProfil'])->name('users.delete-foto');
-        Route::put('/{id}/verify', [UserController::class, 'verify'])->name('users.verify');
-    });
+    // ===== USER MEDIA ROUTES =====
+    Route::delete('/{id}/delete-foto', [UserController::class, 'deleteFotoProfil'])->name('users.delete-foto');
+    Route::put('/{id}/verify', [UserController::class, 'verify'])->name('users.verify');
+});
 });

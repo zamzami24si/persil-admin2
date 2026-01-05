@@ -21,12 +21,15 @@
                 </li>
 
                 <!-- Data Master Menu -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
+                <li class="nav-item {{ request()->is('warga*') || request()->is('persil*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('warga*') || request()->is('persil*') ? 'active' : '' }}">
                         <i class="nav-icon bi bi-database"></i>
-                        <p>Data Master <i class="nav-arrow bi bi-chevron-right"></i></p>
+                        <p>
+                            Data Master
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
-                    <ul class="nav nav-treeview">
+                    <ul class="nav nav-treeview" style="{{ request()->is('warga*') || request()->is('persil*') ? 'display: block;' : 'display: none;' }}">
                         <!-- Menu Warga -->
                         <li class="nav-item">
                             <a href="{{ route('warga.index') }}" class="nav-link {{ request()->is('warga*') ? 'active' : '' }}">
@@ -46,13 +49,15 @@
                 </li>
 
                 <!-- Pertanahan Menu -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link {{ request()->is('persil*') || request()->is('dokumen-persil*') || request()->is('peta-persil*') ? 'active' : '' }}">
+                <li class="nav-item {{ request()->is('dokumen-persil*') || request()->is('peta-persil*') ? 'menu-open' : '' }}">
+                    <a href="#" class="nav-link {{ request()->is('dokumen-persil*') || request()->is('peta-persil*') ? 'active' : '' }}">
                         <i class="nav-icon bi bi-house-door"></i>
-                        <p>Pertanahan <i class="nav-arrow bi bi-chevron-right"></i></p>
+                        <p>
+                            Pertanahan
+                            <i class="nav-arrow bi bi-chevron-right"></i>
+                        </p>
                     </a>
-                    <ul class="nav nav-treeview">
-
+                    <ul class="nav nav-treeview" style="{{ request()->is('dokumen-persil*') || request()->is('peta-persil*') ? 'display: block;' : 'display: none;' }}">
                         <li class="nav-item">
                             <a href="{{ route('dokumen-persil.index') }}" class="nav-link {{ request()->is('dokumen-persil*') ? 'active' : '' }}">
                                 <i class="nav-icon bi bi-file-earmark-text"></i>
@@ -82,8 +87,6 @@
                     </a>
                 </li>
 
-              
-
                 <!-- ============================================
                      USER MANAGEMENT MENU - HANYA UNTUK ADMIN
                 ============================================ -->
@@ -100,12 +103,7 @@
                 ============================================ -->
 
                 <!-- Pengaturan Menu -->
-                <li class="nav-item">
-                    <a href="#" class="nav-link">
-                        <i class="nav-icon bi bi-gear"></i>
-                        <p>Pengaturan</p>
-                    </a>
-                </li>
+
             </ul>
         </nav>
     </div>
@@ -119,19 +117,7 @@
                     <!-- User Info Toggle -->
                     <a href="#" class="d-flex align-items-center text-decoration-none text-white dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                         <!-- User Avatar -->
-                        <div class="user-avatar me-2">
-                            @if(Auth::user()->avatar && file_exists(storage_path('app/public/' . Auth::user()->avatar)))
-                                <img src="{{ asset('storage/' . Auth::user()->avatar) }}"
-                                     class="rounded-circle shadow" width="40" height="40" alt="User Avatar" />
-                            @elseif(file_exists(public_path('assets-admin/assets/img/user2-160x160.jpg')))
-                                <img src="{{ asset('assets-admin/assets/img/user2-160x160.jpg') }}"
-                                     class="rounded-circle shadow" width="40" height="40" alt="User Image" />
-                            @else
-                                <div class="avatar-placeholder rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                                </div>
-                            @endif
-                        </div>
+                        
 
                         <!-- User Info -->
                         <div class="user-info">
@@ -180,16 +166,10 @@
                             </a>
                         </li>
 
-                        <!-- Settings Link -->
-                        <li>
-                            <a class="dropdown-item" href="#">
-                                <i class="bi bi-gear me-2"></i>
-                                Settings
-                            </a>
-                        </li>
+
 
                         <!-- Tambahkan User Management link di dropdown jika user adalah admin -->
-                        @if(Auth::check() && (Auth::user()->role === 'super_admin' || Auth::user()->role === 'super_admin'))
+                        @if(Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin'))
                         <li>
                             <a class="dropdown-item" href="{{ route('users.index') }}">
                                 <i class="bi bi-people-fill me-2"></i>
@@ -233,7 +213,7 @@
     </div>
 </aside>
 
-<!-- CSS Fix untuk dropdown positioning -->
+<!-- CSS Fix untuk dropdown positioning dan hover aktif -->
 <style>
     /* Fix untuk dropdown positioning di sidebar */
     .sidebar-footer .dropdown-menu {
@@ -312,9 +292,61 @@
     .dropdown-menu {
         z-index: 1060 !important;
     }
+
+    /* Styling untuk menu aktif */
+    .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: white !important;
+        border-left: 3px solid #4e73df !important;
+    }
+
+    .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: #dee2e6 !important;
+    }
+
+    /* Styling untuk menu parent yang aktif (menu-open) */
+    .nav-item.menu-open > .nav-link {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: white !important;
+    }
+
+    .nav-item.menu-open > .nav-link > .nav-arrow {
+        transform: rotate(90deg) !important;
+    }
+
+    /* Styling untuk menu treeview */
+    .nav-treeview {
+        padding-left: 20px;
+    }
+
+    /* Styling untuk submenu yang aktif */
+    .nav-treeview .nav-link.active {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: white !important;
+        border-left: 3px solid #36b9cc !important;
+    }
+
+    /* Hover effect untuk submenu */
+    .nav-treeview .nav-link:hover:not(.active) {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: #dee2e6 !important;
+    }
+
+    /* Icon arrow untuk menu terbuka */
+    .nav-item.menu-open > .nav-link > .nav-arrow {
+        transform: rotate(90deg);
+    }
+
+    /* Transisi untuk arrow */
+    .nav-arrow {
+        transition: transform 0.3s ease;
+        float: right;
+        margin-top: 3px;
+    }
 </style>
 
-<!-- JavaScript untuk handle dropdown -->
+<!-- JavaScript untuk handle dropdown dan treeview -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Handle dropdown di sidebar footer
@@ -351,5 +383,53 @@
                 });
             });
         }
+
+        // Handle treeview menu (Data Master dan Pertanahan)
+        const treeviewLinks = document.querySelectorAll('.nav-item > .nav-link[href="#"]');
+
+        treeviewLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const parentItem = this.closest('.nav-item');
+                const submenu = this.nextElementSibling;
+                const arrow = this.querySelector('.nav-arrow');
+
+                if (submenu && submenu.classList.contains('nav-treeview')) {
+                    // Toggle submenu display
+                    if (submenu.style.display === 'block') {
+                        submenu.style.display = 'none';
+                        parentItem.classList.remove('menu-open');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(0deg)';
+                        }
+                    } else {
+                        submenu.style.display = 'block';
+                        parentItem.classList.add('menu-open');
+                        if (arrow) {
+                            arrow.style.transform = 'rotate(90deg)';
+                        }
+                    }
+                }
+            });
+        });
+
+        // Handle hover untuk menu
+        const navLinks = document.querySelectorAll('.nav-link:not([href="#"])');
+
+        navLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
+                }
+            });
+
+            link.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.backgroundColor = '';
+                }
+            });
+        });
     });
 </script>

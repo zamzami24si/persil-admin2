@@ -1,11 +1,11 @@
 <?php
-// app/Models/SengketaPersil.php
 
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage; // Pastikan import ini
 
 class SengketaPersil extends Model
 {
@@ -15,15 +15,9 @@ class SengketaPersil extends Model
     protected $primaryKey = 'sengketa_id';
 
     protected $fillable = [
-        'persil_id',
-        'pihak_1',
-        'pihak_2',
-        'kronologi',
-        'status',
-        'penyelesaian'
+        'persil_id', 'pihak_1', 'pihak_2', 'kronologi', 'status', 'penyelesaian'
     ];
 
-    // ===== RELATIONSHIPS =====
     public function persil()
     {
         return $this->belongsTo(Persil::class, 'persil_id');
@@ -60,50 +54,31 @@ class SengketaPersil extends Model
         return $query;
     }
 
-    // ===== ACCESSORS & MUTATORS =====
+    // ===== HELPERS =====
     public function getStatusLabelAttribute()
     {
-        $statuses = [
-            'proses' => 'Proses',
-            'selesai' => 'Selesai',
-            'dibatalkan' => 'Dibatalkan'
-        ];
-
+        $statuses = ['proses' => 'Proses', 'selesai' => 'Selesai', 'dibatalkan' => 'Dibatalkan'];
         return $statuses[$this->status] ?? $this->status;
     }
 
     public function getStatusBadgeClassAttribute()
     {
-        $classes = [
-            'proses' => 'bg-warning',
-            'selesai' => 'bg-success',
-            'dibatalkan' => 'bg-danger'
-        ];
-
+        $classes = ['proses' => 'bg-warning', 'selesai' => 'bg-success', 'dibatalkan' => 'bg-danger'];
         return $classes[$this->status] ?? 'bg-secondary';
     }
 
-    public function getBuktiFilePathAttribute()
+    // ===== MEDIA UPLOAD =====
+    public function uploadBuktiSengketa($file, $caption = 'Bukti Sengketa')
     {
-        $media = $this->media()->first();
-        return $media ? $media->file_url : null;
-    }
-
-    // ===== MEDIA METHODS =====
-    public function uploadBuktiSengketa($file, $caption = null)
-    {
-        $fileName = 'sengketa_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = 'uploads/sengketa_persil/' . $this->sengketa_id . '/' . $fileName;
-
-        $file->storeAs('public/uploads/sengketa_persil/' . $this->sengketa_id, $fileName);
+        $path = $file->store('uploads/sengketa_persil', 'public');
 
         return Media::create([
             'ref_table' => 'sengketa_persil',
-            'ref_id' => $this->sengketa_id,
-            'file_url' => $path,
-            'caption' => $caption ?? 'Bukti Sengketa',
-            'mime_type' => $file->getMimeType(),
-            'sort_order' => $this->media()->count()
+            'ref_id'    => $this->sengketa_id,
+            'file_url'  => $path,
+            'caption'   => $caption,
+            'mime_type' => $file->getClientMimeType(),
+            'sort_order'=> 0
         ]);
     }
 }

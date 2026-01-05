@@ -13,14 +13,16 @@ class Media extends Model
     protected $table = 'media';
     protected $primaryKey = 'media_id';
 
-    protected $fillable = [
+  protected $fillable = [
         'ref_table',
         'ref_id',
+        'file_name',
         'file_url',
-        'caption',
-        'mime_type',
-        'sort_order'
+        'file_type',
+        'file_size',
+        'description' // opsional
     ];
+
 
     // ===== RELATIONSHIPS =====
 

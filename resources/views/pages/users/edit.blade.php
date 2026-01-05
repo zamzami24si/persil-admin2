@@ -52,15 +52,16 @@
                                     <div class="col-md-4">
                                         <div class="text-center mb-3">
                                             <div class="avatar-preview mb-3" id="avatarPreview">
-                                                <img src="{{ $user->foto_profil_url }}"
+                                                <img src="{{ $user->avatar_url }}"
                                                      class="rounded-circle img-thumbnail"
                                                      style="width: 150px; height: 150px; object-fit: cover;"
-                                                     alt="Foto Profil {{ $user->name }}">
+                                                     alt="Foto Profil {{ $user->name }}"
+                                                     onerror="this.src='{{ asset('assets/img/default-avatar.png') }}'">
                                             </div>
-                                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('foto_profil').click()">
+                                            <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('avatar').click()">
                                                 <i class="fas fa-upload me-1"></i> Ganti Foto
                                             </button>
-                                            @if($user->fotoProfil())
+                                            @if($user->avatar)
                                                 <button type="button" class="btn btn-outline-danger mt-2" onclick="hapusFotoProfil()">
                                                     <i class="fas fa-trash me-1"></i> Hapus Foto
                                                 </button>
@@ -69,21 +70,33 @@
                                     </div>
                                     <div class="col-md-8">
                                         <div class="mb-3">
-                                            <label for="foto_profil" class="form-label fw-semibold">
+                                            <label for="avatar" class="form-label fw-semibold">
                                                 Upload Foto Profil Baru
                                             </label>
-                                            <input type="file" class="form-control @error('foto_profil') is-invalid @enderror"
-                                                   id="foto_profil" name="foto_profil"
-                                                   accept=".jpg,.jpeg,.png,.gif"
+                                            <input type="file" class="form-control @error('avatar') is-invalid @enderror"
+                                                   id="avatar" name="avatar"
+                                                   accept="image/jpeg,image/png,image/gif"
                                                    onchange="previewImage(this)">
                                             <div class="form-text small">
                                                 <i class="fas fa-info-circle me-1"></i>
                                                 Biarkan kosong jika tidak ingin mengubah. Ukuran maksimal 2MB.
+                                                Format: JPG, PNG, GIF
                                             </div>
-                                            @error('foto_profil')
+                                            @error('avatar')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
+
+                                        @if($user->avatar)
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" name="delete_avatar" id="delete_avatar" value="1">
+                                                <label class="form-check-label text-danger fw-medium" for="delete_avatar">
+                                                    <i class="fas fa-trash-alt me-1"></i> Hapus foto profil saat menyimpan
+                                                </label>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -183,12 +196,6 @@
                             </div>
                         </div>
                     </form>
-
-                    <!-- Form untuk hapus foto profil -->
-                    <form id="deleteFotoForm" action="{{ route('users.delete-foto', $user->id) }}" method="POST" class="d-none">
-                        @csrf
-                        @method('DELETE')
-                    </form>
                 </div>
             </div>
         </div>
@@ -211,10 +218,27 @@
         }
     }
 
-    // Hapus foto profil
+    // Hapus foto profil dengan checkbox
     function hapusFotoProfil() {
         if (confirm('Yakin ingin menghapus foto profil?')) {
-            document.getElementById('deleteFotoForm').submit();
+            document.getElementById('delete_avatar').checked = true;
+            document.getElementById('avatarPreview').querySelector('img').src = '{{ asset("assets/img/default-avatar.png") }}';
+
+            // Reset file input
+            document.getElementById('avatar').value = '';
+
+            // Show alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-info alert-dismissible fade show mt-3';
+            alertDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <div>Foto profil akan dihapus saat Anda menyimpan perubahan.</div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('.card-body').firstChild);
         }
     }
 
@@ -230,9 +254,37 @@
             return false;
         }
 
+        // Validasi file size
+        const avatarInput = document.getElementById('avatar');
+        if (avatarInput.files.length > 0) {
+            const fileSize = avatarInput.files[0].size;
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (fileSize > maxSize) {
+                e.preventDefault();
+                alert('Ukuran file terlalu besar. Maksimal 2MB.');
+                return false;
+            }
+        }
+
         // Disable button untuk mencegah double submit
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Menyimpan...';
+
+        // Juga disable semua form inputs
+        const formInputs = this.querySelectorAll('input, select, button, textarea');
+        formInputs.forEach(input => {
+            if (input !== submitBtn) {
+                input.disabled = true;
+            }
+        });
+    });
+
+    // Reset form handler
+    document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        document.getElementById('avatarPreview').querySelector('img').src = '{{ $user->avatar_url }}';
+        if (document.getElementById('delete_avatar')) {
+            document.getElementById('delete_avatar').checked = false;
+        }
     });
 </script>
 @endpush
@@ -246,11 +298,26 @@
         overflow: hidden;
         margin: 0 auto;
         border: 3px solid #dee2e6;
+        transition: border-color 0.3s ease;
+    }
+    .avatar-preview:hover {
+        border-color: #0d6efd;
     }
     .avatar-preview img {
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .avatar-preview:hover img {
+        transform: scale(1.05);
+    }
+    .form-text {
+        font-size: 0.85rem;
+    }
+    .badge {
+        font-size: 0.875rem;
+        padding: 0.5rem 0.75rem;
     }
 </style>
 @endpush

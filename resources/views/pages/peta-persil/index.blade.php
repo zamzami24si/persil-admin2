@@ -6,21 +6,23 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title mb-0">Daftar Peta Persil</h3>
+<div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h4 class="card-title mb-0 fw-bold">Daftar Peta Persil</h4>
+
+        {{-- Dropdown Tambah Peta (Posisi Kanan & Warna Biru) --}}
         <div class="dropdown">
-            <button class="btn btn-sm btn-success dropdown-toggle" type="button" id="addPetaDropdown"
+            <button class="btn btn-primary dropdown-toggle shadow-sm" type="button" id="addPetaDropdown"
                     data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="fas fa-plus me-1"></i> Tambah Peta
+                <i class="fas fa-plus-circle me-2"></i>Tambah Peta
             </button>
-            <ul class="dropdown-menu" aria-labelledby="addPetaDropdown" style="min-width: 300px;">
-                <li><h6 class="dropdown-header">Pilih Persil</h6></li>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="addPetaDropdown" style="min-width: 300px; max-height: 300px; overflow-y: auto;">
+                <li><h6 class="dropdown-header text-uppercase small fw-bold">Pilih Persil</h6></li>
                 @php
                     // Ambil persil yang belum memiliki peta
                     $persilOptions = \App\Models\Persil::with('pemilik')
                         ->whereDoesntHave('peta')
                         ->orderBy('kode_persil')
-                        ->limit(8)
+                        ->limit(10)
                         ->get();
                 @endphp
                 @if($persilOptions->count() > 0)
@@ -46,23 +48,22 @@
                 @else
                     <li>
                         <a class="dropdown-item text-muted" href="#">
-                            <div class="d-flex flex-column">
+                            <div class="d-flex flex-column text-center py-2">
+                                <i class="fas fa-check-circle text-success mb-1"></i>
                                 <span>Semua persil sudah memiliki peta</span>
-                                <small>Edit peta yang sudah ada</small>
                             </div>
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                 @endif
                 <li>
-                    <a class="dropdown-item text-primary" href="{{ route('persil.index') }}">
-                        <i class="fas fa-search me-2"></i> Cari Persil Lainnya...
+                    <a class="dropdown-item text-primary fw-bold text-center" href="{{ route('persil.index') }}">
+                        <i class="fas fa-search me-1"></i> Cari Persil Lainnya
                     </a>
                 </li>
             </ul>
         </div>
-    </div>
-    <div class="card-body">
+    </div>    <div class="card-body">
         @if (session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -84,14 +85,14 @@
                     <label class="form-label">Pencarian</label>
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" value="{{ request('search') }}"
-                            placeholder="Cari berdasarkan panjang atau lebar...">
+                            placeholder="Cari berdasarkan kode persil, pemilik, atau dimensi...">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-search"></i> Search
+                            <i class="fas fa-search"></i> Cari
                         </button>
                         @if (request('search'))
-                            <a href="{{ request()->fullUrlWithQuery(['search' => null]) }}"
+                            <a href="{{ route('peta-persil.index') }}"
                                 class="btn btn-outline-secondary">
-                                Clear
+                                Reset
                             </a>
                         @endif
                     </div>
@@ -129,6 +130,7 @@
                         <th>Dimensi</th>
                         <th>Luas dari Dimensi</th>
                         <th>GeoJSON</th>
+                        <th>Jumlah File</th>
                         <th>Tanggal Dibuat</th>
                         <th>Aksi</th>
                     </tr>
@@ -139,6 +141,8 @@
                             <td>{{ ($peta->currentPage() - 1) * $peta->perPage() + $loop->iteration }}</td>
                             <td>
                                 <strong>{{ $item->persil->kode_persil }}</strong>
+                                <br>
+                                <small class="text-muted">RT {{ $item->persil->rt }}/RW {{ $item->persil->rw }}</small>
                             </td>
                             <td>
                                 {{ $item->persil->pemilik->nama }}
@@ -171,41 +175,55 @@
                                 @endif
                             </td>
                             <td>
-                                <small>{{ $item->created_at->format('d/m/Y') }}</small>
+                                @php
+                                    $fileCount = $item->media ? $item->media->count() : 0;
+                                @endphp
+                                @if($fileCount > 0)
+                                    <span class="badge bg-info">{{ $fileCount }} file</span>
+                                @else
+                                    <span class="text-muted">0</span>
+                                @endif
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    <a href="{{ route('peta-persil.show', $item->peta_id) }}"
-                                       class="btn btn-sm btn-info"
-                                       title="Lihat Detail Peta">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('persil.show', $item->persil_id) }}"
-                                       class="btn btn-sm btn-secondary"
-                                       title="Lihat Data Persil">
-                                        <i class="fas fa-info-circle"></i>
-                                    </a>
-                                    <a href="{{ route('peta-persil.edit', $item->peta_id) }}"
-                                       class="btn btn-sm btn-warning"
-                                       title="Edit Peta">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('peta-persil.destroy', $item->peta_id) }}" method="POST"
-                                        class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger"
-                                            onclick="return confirm('Yakin ingin menghapus data peta untuk persil {{ $item->persil->kode_persil }}?')"
-                                            title="Hapus Peta">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
-                                </div>
+                                <small>{{ $item->created_at->format('d/m/Y') }}</small>
                             </td>
+                           <td>
+    <div class="btn-group" role="group">
+        <a href="{{ route('peta-persil.show', $item->peta_id) }}"
+           class="btn btn-sm btn-info"
+           title="Lihat Detail Peta">
+            <i class="fas fa-eye me-1"></i> Detail
+        </a>
+        {{-- <a href="{{ route('persil.show', $item->persil_id) }}"
+           class="btn btn-sm btn-secondary"
+           title="Lihat Data Persil">
+            <i class="fas fa-info-circle me-1"></i> Persil
+        </a> --}}
+        <a href="{{ route('peta-persil.edit', $item->peta_id) }}"
+           class="btn btn-sm btn-warning"
+           title="Edit Peta">
+            <i class="fas fa-edit me-1"></i> Edit
+        </a>
+        <button type="button"
+                onclick="confirmDelete('{{ $item->peta_id }}', '{{ $item->persil->kode_persil }}')"
+                class="btn btn-sm btn-danger"
+                title="Hapus Peta">
+            <i class="fas fa-trash me-1"></i> Hapus
+        </button>
+    </div>
+
+    <form id="delete-form-{{ $item->peta_id }}"
+          action="{{ route('peta-persil.destroy', $item->peta_id) }}"
+          method="POST"
+          class="d-none">
+        @csrf
+        @method('DELETE')
+    </form>
+</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 <i class="fas fa-map me-2"></i>
                                 @if (request('search'))
                                     Tidak ada data peta yang sesuai dengan filter
@@ -272,5 +290,51 @@
             </div>
         </div>
     </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        @php
+                            $totalFiles = 0;
+                            foreach ($peta as $item) {
+                                $totalFiles += $item->media ? $item->media->count() : 0;
+                            }
+                        @endphp
+                        <h4 class="mb-0">{{ $totalFiles }}</h4>
+                        <small>Total File Upload</small>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-upload fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+<script>
+function confirmDelete(petaId, kodePersil) {
+    if (confirm(`Yakin ingin menghapus data peta untuk persil ${kodePersil}?`)) {
+        document.getElementById(`delete-form-${petaId}`).submit();
+    }
+}
+</script>
+<style>
+.btn-group .btn {
+    border-radius: 0.25rem !important;
+    margin: 0 2px;
+    min-width: 70px;
+}
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.25rem !important;
+    border-bottom-left-radius: 0.25rem !important;
+}
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.25rem !important;
+    border-bottom-right-radius: 0.25rem !important;
+}
+.btn i {
+    font-size: 0.9em;
+}
+</style>
 @endsection
