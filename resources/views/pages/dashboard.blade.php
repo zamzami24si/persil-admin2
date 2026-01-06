@@ -1,5 +1,4 @@
 @extends('layouts.admin.app')
-
 @section('content')
     {{-- Style khusus untuk halaman Dashboard --}}
     <style>
@@ -56,52 +55,30 @@
             background: linear-gradient(135deg, #ffffff 0%, #fff5f5 100%) !important;
         }
 
-        .small-box .inner {
-            margin-bottom: 15px;
-        }
-
-        .small-box h3 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            margin: 0 0 5px 0;
-            color: var(--dark);
-        }
-
-        .small-box p {
-            font-size: 0.95rem;
-            color: var(--gray);
-            margin: 0;
-        }
+        .small-box .inner { margin-bottom: 15px; }
+        .small-box h3 { font-size: 2.2rem; font-weight: 700; margin: 0 0 5px 0; color: var(--dark); }
+        .small-box p { font-size: 0.95rem; color: var(--gray); margin: 0; }
 
         .small-box .icon {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 20px; right: 20px;
             font-size: 2.5rem;
             color: rgba(67, 97, 238, 0.2);
             transition: var(--transition);
         }
 
-        .small-box:hover .icon {
-            transform: scale(1.1);
-            color: rgba(67, 97, 238, 0.3);
-        }
+        .small-box:hover .icon { transform: scale(1.1); color: rgba(67, 97, 238, 0.3); }
 
         .small-box-footer {
             display: inline-block;
-            margin-top: 10px;
-            padding: 5px 0;
+            margin-top: 10px; padding: 5px 0;
             color: var(--primary);
             text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
+            font-weight: 500; font-size: 0.9rem;
             border-top: 1px solid var(--light-gray);
             width: 100%;
         }
-
-        .small-box-footer:hover {
-            color: var(--secondary);
-        }
+        .small-box-footer:hover { color: var(--secondary); }
 
         /* Card Styles */
         .card {
@@ -117,85 +94,41 @@
             background: white;
             border-bottom: 1px solid var(--light-gray);
             padding: 20px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        .card-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--dark);
-            margin: 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .card-title i {
-            margin-right: 10px;
-            color: var(--primary);
-        }
-
-        .card-body {
-            padding: 25px;
-        }
+        .card-title { font-size: 1.2rem; font-weight: 600; color: var(--dark); margin: 0; display: flex; align-items: center; }
+        .card-title i { margin-right: 10px; color: var(--primary); }
+        .card-body { padding: 25px; }
 
         /* Helpers */
-        .main-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-        }
+        .main-row { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; }
+        @media (max-width: 1024px) { .main-row { grid-template-columns: 1fr; } }
 
-        @media (max-width: 1024px) {
-            .main-row {
-                grid-template-columns: 1fr;
-            }
-        }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; }
 
-        .badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 500;
-        }
-
-        /* * FIX CARD GEPENG (Distribusi Gender) * =================================== */
+        /* * FIX CARD GEPENG (Distribusi Gender)
+         * ===================================
+         */
         /* Update Gradient agar vertikal seperti foto */
         .bg-gradient-info {
             background: linear-gradient(180deg, #4361ee 0%, #3a0ca3 100%) !important;
             color: white;
         }
-
-        .bg-gradient-info .card-header {
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .bg-gradient-info .card-title,
-        .bg-gradient-info .card-title i {
-            color: white !important;
-        }
+        .bg-gradient-info .card-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .bg-gradient-info .card-title, .bg-gradient-info .card-title i { color: white !important; }
 
         /* Style Khusus Body Card Gender */
         .gender-card-body {
-            min-height: 400px;
+            min-height: 400px; /* MEMAKSA TINGGI AGAR TIDAK GEPENG */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* Konten vertikal di tengah */
             padding: 40px 30px !important;
         }
 
-        .gender-number {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .gender-label {
-            font-size: 1rem;
-            opacity: 0.9;
-            font-weight: 300;
-        }
+        .gender-number { font-size: 3.5rem; font-weight: 700; margin-bottom: 5px; }
+        .gender-label { font-size: 1rem; opacity: 0.9; font-weight: 300; }
 
         /* Progress Bar Custom */
         .custom-progress {
@@ -205,48 +138,15 @@
             background-color: rgba(255, 255, 255, 0.2);
             margin-top: 30px;
         }
-
-        /* Table Styles */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table thead {
-            background-color: #f8f9fa;
-        }
-
-        .table th {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 2px solid #dee2e6;
-            font-weight: 600;
-        }
-
-        .table td {
-            padding: 16px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .table-striped tbody tr:nth-of-type(odd) {
-            background-color: rgba(0, 0, 0, 0.02);
-        }
-
-        .table-hover tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.04);
-        }
     </style>
 
-    <div class="container-fluid">
-        <div class="row mb-4">
+
+
+        <div class="row">
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{ number_format($totalWarga) }}</h3>
+                        <h3>{{ $totalWarga }}</h3>
                         <p>Total Warga</p>
                     </div>
                     <div class="icon">
@@ -261,7 +161,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>{{ number_format($totalPersil) }}</h3>
+                        <h3>{{ $totalPersil }}</h3>
                         <p>Total Persil</p>
                     </div>
                     <div class="icon">
@@ -291,7 +191,7 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>{{ number_format($lakiLaki) }}/{{ number_format($perempuan) }}</h3>
+                        <h3>{{ $lakiLaki }}/{{ $perempuan }}</h3>
                         <p>Laki / Perempuan</p>
                     </div>
                     <div class="icon">
@@ -305,10 +205,8 @@
         </div>
 
         <div class="main-row">
-            {{-- Kolom Kiri --}}
-            <div class="left-column">
-                {{-- Statistik Penggunaan Lahan --}}
-                <div class="card mb-4">
+            <section class="col-lg-90">
+                <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-chart-pie"></i>
@@ -325,10 +223,10 @@
 
                         @if($penggunaanStats->count() > 0)
                         <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                            <table class="table table-hover w-100">
+                                <thead style="background-color: #f8f9fa;">
                                     <tr>
-                                        <th>Penggunaan Lahan</th>
+                                        <th style="padding: 12px 16px;">Penggunaan Lahan</th>
                                         <th class="text-center">Jumlah Persil</th>
                                         <th class="text-center">Total Luas (m²)</th>
                                         <th class="text-center">Rata-rata</th>
@@ -336,20 +234,20 @@
                                 </thead>
                                 <tbody>
                                     @foreach($penggunaanStats as $stat)
-                                    <tr>
-                                        <td>{{ $stat->penggunaan }}</td>
-                                        <td class="text-center">
-                                            <span class="badge bg-primary">{{ number_format($stat->total) }}</span>
+                                    <tr style="border-bottom: 1px solid var(--light-gray);">
+                                        <td style="padding: 16px;">{{ $stat->penggunaan }}</td>
+                                        <td class="text-center" style="padding: 16px;">
+                                            <span class="badge bg-primary">{{ $stat->total }}</span>
                                         </td>
-                                        <td class="text-center">{{ number_format($stat->total_luas, 2) }}</td>
-                                        <td class="text-center">{{ number_format($stat->total_luas / $stat->total, 2) }}</td>
+                                        <td class="text-center" style="padding: 16px;">{{ number_format($stat->total_luas, 2) }}</td>
+                                        <td class="text-center" style="padding: 16px;">{{ number_format($stat->total_luas / $stat->total, 2) }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
                         @else
-                        <div class="text-center py-5">
+                        <div class="text-center py-4">
                             <i class="fas fa-chart-bar fa-3x text-muted mb-3" style="opacity: 0.5;"></i>
                             <p class="text-muted">Belum ada data penggunaan lahan</p>
                         </div>
@@ -357,7 +255,6 @@
                     </div>
                 </div>
 
-                {{-- Warga Terbaru --}}
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -365,17 +262,17 @@
                             Warga Terbaru
                         </h3>
                         <div class="card-tools">
-                            <a href="{{ route('warga.create') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('warga.create') }}" class="btn btn-sm btn-primary" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; color: white; background-color: var(--primary);">
                                 <i class="fas fa-plus"></i> Tambah
                             </a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table table-striped w-100">
                                 <thead>
                                     <tr>
-                                        <th>Nama</th>
+                                        <th style="padding: 12px 16px;">Nama</th>
                                         <th>NIK</th>
                                         <th>Agama / Pekerjaan</th>
                                         <th>Status</th>
@@ -383,23 +280,21 @@
                                 </thead>
                                 <tbody>
                                     @forelse($wargaTerbaru as $warga)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('warga.show', $warga->warga_id) }}" class="text-primary text-decoration-none fw-medium">
-                                                {{ $warga->nama }}
-                                            </a>
+                                    <tr style="border-bottom: 1px solid var(--light-gray);">
+                                        <td style="padding: 16px;">
+                                            <a href="{{ route('warga.show', $warga->warga_id) }}" style="color: var(--primary); text-decoration: none; font-weight: 500;">{{ $warga->nama }}</a>
                                         </td>
-                                        <td>{{ $warga->no_ktp }}</td>
-                                        <td>{{ $warga->agama ?? '-' }} / {{ $warga->pekerjaan ?? '-' }}</td>
-                                        <td>
-                                            <span class="badge {{ $warga->jenis_kelamin == 'L' ? 'bg-primary' : 'bg-success' }}">
+                                        <td style="padding: 16px;">{{ $warga->no_ktp }}</td>
+                                        <td style="padding: 16px;">{{ $warga->agama ?? '-' }}, {{ $warga->pekerjaan ?? '-' }}</td>
+                                        <td style="padding: 16px;">
+                                            <span class="badge bg-{{ $warga->jenis_kelamin == 'L' ? 'primary' : 'success' }}" style="color:white; background-color: {{ $warga->jenis_kelamin == 'L' ? '#4361ee' : '#2ecc71' }};">
                                                 {{ $warga->jenis_kelamin == 'L' ? 'Laki-laki' : 'Perempuan' }}
                                             </span>
                                         </td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted">
+                                        <td colspan="4" class="text-center py-4 text-muted">
                                             <i class="fas fa-user-slash me-2"></i>Belum ada data warga
                                         </td>
                                     </tr>
@@ -409,12 +304,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {{-- Kolom Kanan --}}
-            <div class="right-column">
-                {{-- Distribusi Jenis Kelamin --}}
-                <div class="card bg-gradient-info mb-4">
+            <section class="col-lg-100">
+                <div class="card bg-gradient-info">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-chart-pie me-2"></i>
@@ -425,11 +318,11 @@
                         @if($lakiLaki > 0 || $perempuan > 0)
                         <div class="row align-items-center mb-4">
                             <div class="col-6 text-center" style="border-right: 1px solid rgba(255,255,255,0.2);">
-                                <div class="gender-number">{{ number_format($lakiLaki) }}</div>
+                                <div class="gender-number">{{ $lakiLaki }}</div>
                                 <div class="gender-label">Laki-laki</div>
                             </div>
                             <div class="col-6 text-center">
-                                <div class="gender-number">{{ number_format($perempuan) }}</div>
+                                <div class="gender-number">{{ $perempuan }}</div>
                                 <div class="gender-label">Perempuan</div>
                             </div>
                         </div>
@@ -441,27 +334,26 @@
                                 $percentageP = $totalGender > 0 ? ($perempuan / $totalGender) * 100 : 0;
                             @endphp
 
-                            <div class="d-flex justify-content-between mb-2 small fw-bold">
+                            <div class="d-flex justify-content-between mb-2 small font-weight-bold">
                                 <span>{{ number_format($percentageL, 1) }}%</span>
                                 <span>{{ number_format($percentageP, 1) }}%</span>
                             </div>
 
                             <div class="progress custom-progress">
-                                <div class="progress-bar" style="width: {{ $percentageL }}%; background-color: #4361ee;"></div>
-                                <div class="progress-bar" style="width: {{ $percentageP }}%; background-color: #f72585;"></div>
+                                <div class="progress-bar" style="width: {{ $percentageL }}%; background-color: #4361ee;" role="progressbar"></div>
+                                <div class="progress-bar" style="width: {{ $percentageP }}%; background-color: #f72585;" role="progressbar"></div>
                             </div>
                         </div>
                         @else
-                        <div class="text-center py-5">
+                        <div class="text-center py-4">
                             <i class="fas fa-chart-pie fa-4x mb-3" style="opacity: 0.6;"></i>
-                            <p class="h5 fw-light">Belum ada data warga</p>
+                            <p class="h5 font-weight-light">Belum ada data warga</p>
                         </div>
                         @endif
                     </div>
                 </div>
 
-                {{-- Informasi Login --}}
-                <div class="card mb-4">
+                <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-user"></i>
@@ -469,39 +361,31 @@
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="row mb-3 pb-2 border-bottom">
-                            <div class="col-4 text-muted fw-medium">Nama:</div>
+                        <div class="row mb-3" style="border-bottom: 1px solid var(--light-gray); padding-bottom: 10px;">
+                            <div class="col-4 text-muted" style="color: var(--gray); font-weight: 500;">Nama:</div>
                             <div class="col-8">{{ Auth::user()->name }}</div>
                         </div>
-                        <div class="row mb-3 pb-2 border-bottom">
-                            <div class="col-4 text-muted fw-medium">Email:</div>
+                        <div class="row mb-3" style="border-bottom: 1px solid var(--light-gray); padding-bottom: 10px;">
+                            <div class="col-4 text-muted" style="color: var(--gray); font-weight: 500;">Email:</div>
                             <div class="col-8">{{ Auth::user()->email }}</div>
                         </div>
-                        <div class="row mb-3 pb-2 border-bottom">
-                            <div class="col-4 text-muted fw-medium">Role:</div>
+                        <div class="row mb-3" style="border-bottom: 1px solid var(--light-gray); padding-bottom: 10px;">
+                            <div class="col-4 text-muted" style="color: var(--gray); font-weight: 500;">Role:</div>
                             <div class="col-8">
-                                @php
-                                    $roleColors = [
-                                        'super_admin' => 'bg-danger',
-                                        'admin' => 'bg-success',
-                                        'user' => 'bg-primary'
-                                    ];
-                                @endphp
-                                <span class="badge {{ $roleColors[Auth::user()->role] ?? 'bg-secondary' }}">
-                                    {{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}
+                                <span class="badge" style="background-color: {{ Auth::user()->role == 'admin' ? '#2ecc71' : (Auth::user()->role == 'super_admin' ? '#e74c3c' : '#4361ee') }}; color: white;">
+                                    {{ Auth::user()->role }}
                                 </span>
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-4 text-muted fw-medium">Login Terakhir:</div>
+                            <div class="col-4 text-muted" style="color: var(--gray); font-weight: 500;">Login Terakhir:</div>
                             <div class="col-8">
-                                {{ session('last_login') ? \Carbon\Carbon::parse(session('last_login'))->translatedFormat('d/m/Y H:i') : 'Baru login' }}
+                                {{ session('last_login') ? \Carbon\Carbon::parse(session('last_login'))->format('d/m/Y H:i') : 'Baru login' }}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Persil Terbaru --}}
                 <div class="card">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -509,17 +393,17 @@
                             Persil Terbaru
                         </h3>
                         <div class="card-tools">
-                            <a href="{{ route('persil.create') }}" class="btn btn-sm btn-primary">
+                            <a href="{{ route('persil.create') }}" class="btn btn-sm btn-primary" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; color: white; background-color: var(--primary);">
                                 <i class="fas fa-plus"></i> Tambah
                             </a>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped">
+                            <table class="table table-striped w-100">
                                 <thead>
                                     <tr>
-                                        <th>Kode</th>
+                                        <th style="padding: 12px 16px;">Kode</th>
                                         <th>Pemilik</th>
                                         <th>Luas</th>
                                         <th>RT/RW</th>
@@ -527,19 +411,17 @@
                                 </thead>
                                 <tbody>
                                     @forelse($persilTerbaru as $persil)
-                                    <tr>
-                                        <td>
-                                            <a href="{{ route('persil.show', $persil->persil_id) }}" class="text-primary text-decoration-none">
-                                                {{ $persil->kode_persil }}
-                                            </a>
+                                    <tr style="border-bottom: 1px solid var(--light-gray);">
+                                        <td style="padding: 16px;">
+                                            <a href="{{ route('persil.show', $persil->persil_id) }}" style="color: var(--primary); text-decoration: none;">{{ $persil->kode_persil }}</a>
                                         </td>
-                                        <td>{{ $persil->pemilik->nama ?? '-' }}</td>
-                                        <td>{{ number_format($persil->luas_m2, 2) }} m²</td>
-                                        <td>{{ $persil->rt }}/{{ $persil->rw }}</td>
+                                        <td style="padding: 16px;">{{ $persil->penilik->nama ?? '-' }}</td>
+                                        <td style="padding: 16px;">{{ number_format($persil->luas_m2, 2) }} m²</td>
+                                        <td style="padding: 16px;">{{ $persil->rt }}/{{ $persil->rw }}</td>
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="4" class="text-center py-5 text-muted">
+                                        <td colspan="4" class="text-center py-4 text-muted">
                                             <i class="fas fa-landmark me-2"></i>Belum ada data persil
                                         </td>
                                     </tr>
@@ -549,7 +431,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 

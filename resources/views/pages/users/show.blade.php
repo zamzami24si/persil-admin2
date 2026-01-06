@@ -29,12 +29,15 @@
                         <div class="col-md-4">
                             <div class="text-center mb-4">
                                 <div class="avatar-display mb-3">
-                                    {{-- PERBAIKAN LOGIC FOTO --}}
-                                    @if($user->foto_profil)
-                                        <img src="{{ asset('storage/' . $user->foto_profil) }}"
+                                    {{-- PERBAIKAN DI SINI --}}
+                                    {{-- Cek kolom 'avatar', bukan 'foto_profil' --}}
+                                    @if($user->avatar)
+                                        {{-- Gunakan avatar_url agar sama dengan logic di Edit --}}
+                                        <img src="{{ $user->avatar_url }}"
                                              class="rounded-circle img-thumbnail"
-                                             style="width: 200px; height: 200px; object-fit: cover;"
-                                             alt="Foto Profil {{ $user->name }}">
+                                             style="width: 150px; height: 150px; object-fit: cover;"
+                                             alt="Foto Profil {{ $user->name }}"
+                                             onerror="this.src='{{ asset('assets/img/default-avatar.png') }}'">
                                     @else
                                         {{-- Fallback jika tidak ada foto (Pakai UI Avatars) --}}
                                         <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=random&size=200"
@@ -155,9 +158,13 @@
         height: 200px;
         border-radius: 50%;
         overflow: hidden;
+        display: flex; /* Tambahan agar gambar center */
+        align-items: center;
+        justify-content: center;
         margin: 0 auto;
         border: 5px solid #fff;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        background-color: #f8f9fa; /* Background jika gambar transparan/loading */
     }
     .avatar-display img {
         width: 100%;

@@ -230,18 +230,16 @@
                 </div>
             </div>
 
-            <!-- Hidden role field -->
-            @if(Auth::check() && Auth::user()->role === 'admin')
+          @if(Auth::check() && Auth::user()->role === 'admin')
             <div class="mb-3">
                 <label for="role" class="form-label">Role</label>
                 <select name="role" id="role" class="form-control">
-                    <option value="warga">Warga</option>
-                    <option value="operator">Operator</option>
+                    <option value="user">Warga / User</option>
                     <option value="admin">Admin</option>
                 </select>
             </div>
             @else
-            <input type="hidden" name="role" value="warga">
+            <input type="hidden" name="role" value="user">
             @endif
 
             <button type="submit" class="btn btn-register">

@@ -115,39 +115,34 @@
                 <tbody>
                     @forelse($users as $user)
                         <tr>
-                            <td class="text-center align-middle" data-label="No">
+                            <td class="text-center align-middle">
                                 {{ ($users->currentPage() - 1) * $users->perPage() + $loop->iteration }}
                             </td>
-                            <td class="text-center align-middle" data-label="Foto">
+                            <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center">
                                     <div class="avatar-table">
-                                        @php
-                                            // DEBUGBAR: Cek apakah avatar_url ada
-                                            // Hapus komentar ini untuk debug:
-                                            // {{-- DEBUG: {{ $user->avatar_url }} --}}
-                                        @endphp
-
-                                        <img src="{{ $user->avatar_url }}"
-                                             class="rounded-circle shadow-sm user-avatar"
+                                        <img src="{{ $user->avatar_url ?? asset('assets/img/default-avatar.png') }}"
+                                             class="rounded-circle shadow-sm"
+                                             style="width: 48px; height: 48px; object-fit: cover;"
                                              alt="{{ $user->name }}"
                                              title="{{ $user->name }}"
-                                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&color=7F9CF5&background=EBF4FF'">
+                                             onerror="this.onerror=null; this.src='{{ asset('assets/img/default-avatar.png') }}'">
                                     </div>
                                 </div>
                             </td>
-                            <td class="align-middle" data-label="Nama">
+                            <td class="align-middle">
                                 <div class="d-flex flex-column">
                                     <strong class="text-dark">{{ $user->name }}</strong>
                                     <small class="text-muted">ID: {{ $user->id }}</small>
                                 </div>
                             </td>
-                            <td class="align-middle" data-label="Email">
+                            <td class="align-middle">
                                 <a href="mailto:{{ $user->email }}" class="text-decoration-none">
                                     <i class="fas fa-envelope me-1 text-primary"></i>
                                     {{ $user->email }}
                                 </a>
                             </td>
-                            <td class="text-center align-middle" data-label="Role">
+                            <td class="text-center align-middle">
                                 @php
                                     // Warna badge berdasarkan role
                                     $roleClass = match($user->role) {
@@ -171,7 +166,7 @@
                                 </span>
                             </td>
 
-                            <td class="text-center align-middle" data-label="Aksi">
+                            <td class="text-center align-middle">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="{{ route('users.show', $user->id) }}"
                                         class="btn btn-sm btn-info text-white d-flex align-items-center gap-1"
@@ -210,7 +205,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">
+                            <td colspan="8" class="text-center text-muted py-4">
                                 <div class="py-5">
                                     <i class="fas fa-user-slash fa-4x text-muted mb-3"></i>
                                     <h5 class="mb-2">
@@ -262,18 +257,11 @@
         });
 
         // Debug: Cek jika ada error pada image loading
-        document.querySelectorAll('.user-avatar').forEach(img => {
-            img.addEventListener('error', function(e) {
-                console.error('Gagal memuat foto:', this.src);
-
-                // Fallback ke avatar berdasarkan inisial nama
-                const userName = this.alt || 'User';
-                const encodedName = encodeURIComponent(userName);
-                this.src = `https://ui-avatars.com/api/?name=${encodedName}&color=7F9CF5&background=EBF4FF`;
+        document.querySelectorAll('img').forEach(img => {
+            img.addEventListener('error', function() {
+                console.log('Image error:', this.src);
+                this.src = '{{ asset('assets/img/default-avatar.png') }}';
             });
-
-            // Debug: Tampilkan URL di console
-            console.log('Avatar URL:', img.src, 'untuk user:', img.alt);
         });
     });
 
@@ -303,10 +291,6 @@
         overflow: hidden;
         border: 2px solid #dee2e6;
         transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f8f9fa;
     }
     .avatar-table:hover {
         border-color: #0d6efd;
@@ -316,12 +300,7 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
-        display: block;
-    }
-    .user-avatar {
-        width: 48px;
-        height: 48px;
-        object-fit: cover;
+        display: block; /* Prevent spacing issues */
     }
     .table thead th {
         background-color: #f8f9fa;
@@ -350,10 +329,10 @@
         font-size: 0.85rem;
     }
 
-    /* Fix for action column */
+    /* Fix for status column */
     .table td:nth-child(6),
     .table th:nth-child(6) {
-        min-width: 160px;
+        min-width: 120px;
     }
 
     /* Fix for role column */
@@ -394,13 +373,21 @@
             color: #6c757d;
             margin-right: 1rem;
             flex: 1;
-            min-width: 80px;
         }
         .table tbody td:not(:first-child) {
             border-top: 1px solid #dee2e6;
         }
 
-        /* Remove old data-label references for non-existent columns */
+        /* Add data labels for responsive table */
+        .table tbody td:nth-child(1) { data-label: "No"; justify-content: flex-start; }
+        .table tbody td:nth-child(2) { data-label: "Foto"; justify-content: center; }
+        .table tbody td:nth-child(3) { data-label: "Nama"; }
+        .table tbody td:nth-child(4) { data-label: "Email"; }
+        .table tbody td:nth-child(5) { data-label: "Role"; }
+        .table tbody td:nth-child(6) { data-label: "Status"; }
+        .table tbody td:nth-child(7) { data-label: "Terakhir Login"; }
+        .table tbody td:nth-child(8) { data-label: "Aksi"; }
+
         .avatar-table {
             width: 40px;
             height: 40px;
@@ -414,14 +401,6 @@
         }
         .btn-sm i {
             margin-right: 0 !important;
-        }
-
-        /* Center avatar on mobile */
-        .table tbody td[data-label="Foto"] {
-            justify-content: center;
-        }
-        .table tbody td[data-label="Foto"]::before {
-            display: none;
         }
     }
 </style>
